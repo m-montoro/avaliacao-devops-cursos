@@ -1,0 +1,24 @@
+---
+- name: Configurar rede privada das VMs
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Configurar IP privado da interface enp0s8
+      copy:
+        dest: /etc/netplan/90-cursos-devops.yaml
+        mode: '0600'
+        content: |
+          network:
+            version: 2
+            ethernets:
+              enp0s8:
+                dhcp4: false
+                dhcp6: false
+                addresses:
+                  - {{ '172.30.88.10/24' if inventory_hostname == 'vm1' else '172.30.88.20/24' }}
+      notify: Aplicar Netplan
+
+  handlers:
+    - name: Aplicar Netplan
+      command: netplan apply

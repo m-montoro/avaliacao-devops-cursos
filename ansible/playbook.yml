@@ -1,0 +1,60 @@
+---
+- name: Implantar API e MySQL na VM2
+  hosts: api
+  become: true
+
+  tasks:
+    - name: Criar diretorio da aplicacao
+      file:
+        path: /opt/cursos-api
+        state: directory
+        owner: devops
+        group: devops
+        mode: '0755'
+
+    - name: Copiar arquivos da API
+      copy:
+        src: ../api/
+        dest: /opt/cursos-api/
+        owner: devops
+        group: devops
+        mode: preserve
+
+    - name: Proteger arquivo de senhas
+      file:
+        path: /opt/cursos-api/.env
+        owner: devops
+        group: devops
+        mode: '0600'
+
+    - name: Construir e iniciar contêineres
+      command: docker compose up -d --build
+      args:
+        chdir: /opt/cursos-api
+      no_log: false
+
+- name: Implantar interface web na VM1
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Criar diretorio da interface
+      file:
+        path: /opt/cursos-web
+        state: directory
+        owner: devops
+        group: devops
+        mode: '0755'
+
+    - name: Copiar arquivos da interface
+      copy:
+        src: ../app/
+        dest: /opt/cursos-web/
+        owner: devops
+        group: devops
+        mode: preserve
+
+    - name: Iniciar contêiner web
+      command: docker compose up -d --build
+      args:
+        chdir: /opt/cursos-web

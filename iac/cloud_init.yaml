@@ -1,0 +1,29 @@
+#cloud-config
+hostname: devops
+manage_etc_hosts: true
+
+users:
+  - name: devops
+    gecos: Aluno DevOps
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKFfQpBdU+ZrBOo3x47X3RzLOl12Jhz29eogeWYhJQQI devops-avaliacao
+
+ssh_pwauth: false
+disable_root: true
+
+package_update: true
+packages:
+  - openssh-server
+  - docker.io
+  - docker-compose-v2
+
+runcmd:
+  - systemctl enable --now ssh
+  - systemctl enable --now docker
+  - usermod -aG docker devops
+
+final_message: "Cloud-init finalizado!"

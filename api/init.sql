@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS cursos_db;
+
+USE cursos_db;
+
+CREATE TABLE IF NOT EXISTS cursos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    instrutor VARCHAR(150) NOT NULL,
+    preco DECIMAL(10,2) NOT NULL,
+    vagas INT NOT NULL
+);

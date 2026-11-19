@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Cursos</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 30px 15px;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 { color: #1d4ed8; }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 3px 12px #00000012;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+
+    button:hover { background: #1d4ed8; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th { background: #eff6ff; }
+
+    .tabela {
+      overflow-x: auto;
+    }
+
+    #mensagem {
+      font-weight: bold;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Sistema de Cadastro de Cursos</h1>
+    <p>Avaliação Prática de DevOps</p>
+
+    <section class="card">
+      <h2>Cadastrar novo curso</h2>
+
+      <form id="formCurso">
+        <label for="nome">Nome do curso</label>
+        <input id="nome" maxlength="150" required>
+
+        <label for="instrutor">Instrutor</label>
+        <input id="instrutor" maxlength="150" required>
+
+        <label for="preco">Preço (R$)</label>
+        <input id="preco" type="number"
+               min="0" step="0.01" required>
+
+        <label for="vagas">Quantidade de vagas</label>
+        <input id="vagas" type="number"
+               min="0" step="1" required>
+
+        <button type="submit">Cadastrar curso</button>
+      </form>
+
+      <p id="mensagem" role="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>Cursos cadastrados</h2>
+      <button type="button" id="atualizar">
+        Atualizar lista
+      </button>
+
+      <div class="tabela">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Curso</th>
+              <th>Instrutor</th>
+              <th>Preço</th>
+              <th>Vagas</th>
+            </tr>
+          </thead>
+          <tbody id="listaCursos"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API = "/api";
+    const form = document.getElementById("formCurso");
+    const mensagem = document.getElementById("mensagem");
+    const lista = document.getElementById("listaCursos");
+
+    async function carregarCursos() {
+      try {
+        const resposta = await fetch(API + "/cursos");
+
+        if (!resposta.ok) {
+          throw new Error("Erro HTTP " + resposta.status);
+        }
+
+        const cursos = await resposta.json();
+        lista.replaceChildren();
+
+        if (cursos.length === 0) {
+          const linha = lista.insertRow();
+          const celula = linha.insertCell();
+          celula.colSpan = 5;
+          celula.textContent = "Nenhum curso cadastrado.";
+          return;
+        }
+
+        for (const curso of cursos) {
+          const linha = lista.insertRow();
+
+          const valores = [
+            curso.id,
+            curso.nome,
+            curso.instrutor,
+            Number(curso.preco).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL"
+            }),
+            curso.vagas
+          ];
+
+          for (const valor of valores) {
+            linha.insertCell().textContent = valor;
+          }
+        }
+      } catch (erro) {
+        lista.replaceChildren();
+        const linha = lista.insertRow();
+        const celula = linha.insertCell();
+        celula.colSpan = 5;
+        celula.textContent = "Erro ao carregar cursos.";
+        console.error(erro);
+      }
+    }
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+
+      const curso = {
+        nome: document.getElementById("nome").value,
+        instrutor: document.getElementById("instrutor").value,
+        preco: Number(document.getElementById("preco").value),
+        vagas: Number(document.getElementById("vagas").value)
+      };
+
+      try {
+        const resposta = await fetch(API + "/curso", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(curso)
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Falha no cadastro");
+        }
+
+        mensagem.textContent = "Curso cadastrado com sucesso!";
+        mensagem.style.color = "green";
+
+        form.reset();
+        await carregarCursos();
+      } catch (erro) {
+        mensagem.textContent = "Erro ao cadastrar curso.";
+        mensagem.style.color = "red";
+        console.error(erro);
+      }
+    });
+
+    document.getElementById("atualizar")
+      .addEventListener("click", carregarCursos);
+
+    carregarCursos();
+  </script>
+</body>
+</html>

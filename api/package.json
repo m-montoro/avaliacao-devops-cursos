@@ -1,0 +1,13 @@
+{
+  "name": "cadastro-cursos-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mysql2": "^3.14.0",
+    "cors": "^2.8.5"
+  }
+}

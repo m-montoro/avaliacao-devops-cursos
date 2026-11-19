@@ -1,0 +1,27 @@
+# Credenciais
+.env
+**/.env
+*.pem
+*.key
+id_ed25519
+
+# OpenTofu
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+
+# Imagens e maquinas virtuais
+*.vdi
+*.vmdk
+*.img
+*.iso
+iac/maquinas/
+iac/imagens/
+
+# Dependencias e logs
+node_modules/
+*.log
+
+# Arquivos de sistema
+.DS_Store
